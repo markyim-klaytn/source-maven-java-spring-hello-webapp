@@ -14,12 +14,12 @@ pipeline {
     }
     stage('Build') {
       steps {
-        sh 'cat /etc/fstab'
+        echo 'hello world'
       }
     }
     stage('Test') {
       steps {
-        sh 'cat /etc/fstab'
+        echo 'hello world'
       }
     }
     stage('Deploy') {
