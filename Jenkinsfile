@@ -8,7 +8,7 @@ pipeline {
       steps {
         sh 'sleep 20'
         echo 'Hello World'
-        echo 'Hello World Again
+        echo 'Hello World Again'
       }
     }
         stage('parellel2'){
