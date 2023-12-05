@@ -1,31 +1,23 @@
 pipeline {
   agent any
 
-  triggers {
-    pollSCM('* * * * *')
-  }
-
   stages {
-    stage('Checkout') {
+    stage('Parellel Job') {
+      parellel{
+        stage('parellel1'){
       steps {
-        git branch: 'main', 
-        url: 'http://3.38.200.252:8080/'
+        sh 'sleep 20'
+        echo 'Hello World'
+        echo 'Hello World Again
       }
     }
-    stage('Build') {
+        stage('parellel2'){
       steps {
-        echo 'hello world'
+        sh 'sleep 20'
+        sh 'cat /etc/os-release'
       }
     }
-    stage('Test') {
-      steps {
-        echo 'hello world'
-      }
-    }
-    stage('Deploy') {
-      steps {
-        deploy adapters: [tomcat9(credentialsId: '<NAME>', url: '<URL>')], contextPath: null, war: 'path/to/war'
-      }
-    }
+   }
   }
+ }
 }
