@@ -9,17 +9,17 @@ pipeline {
     stage('Checkout') {
       steps {
         git branch: 'main', 
-        url: '<URL>'
+        url: 'https://github.com/markyim-klaytn/source-maven-java-spring-hello-webapp'
       }
     }
     stage('Build') {
       steps {
-        sh '<COMMAND>'
+        sh 'cat /etc/fstab'
       }
     }
     stage('Test') {
       steps {
-        sh '<COMMAND>'
+        sh 'cat /etc/fstab'
       }
     }
     stage('Deploy') {
