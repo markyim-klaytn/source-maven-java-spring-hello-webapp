@@ -12,6 +12,12 @@ spec:
     - sleep
     args:
     - infinity
+  - name: git
+    image: alpine/git
+    command:
+    - sleep
+    args:
+    - infinity
   - name: kaniko
     image: gcr.io/kaniko-project/executor:debug
     command:
@@ -35,7 +41,7 @@ spec:
     stage('Checkout') {
       steps {
         container('maven') {
-          git branch: 'main', url: 'https://github.com/markyim-klaytn/source-maven-java-spring-hello-webapp'
+          git branch: 'main', url: '<URL>'
         }
       }
     }
@@ -53,17 +59,35 @@ spec:
         }
       }
     }
-    stage('Debug: List Workspace') {
-      steps {
-        container('maven') {
-          sh 'ls -la'  // Lists all files in the current directory
-        }
-      }
-    }
     stage('Build & Tag & Push Docker Image') {
       steps {
         container('kaniko') {
-          sh 'executor --context=dir://$WORKSPACE --destination=jkyim76/myhello:$BUILD_NUMBER --destination=jkyim76/myhello:latest'
+          sh 'executor --context=dir:///home/jenkins/agent/workspace/kube_pipeline/ --destination=jkyim76/myhello:$BUILD_NUMBER --destination=jkyim76/myhello:latest'
+        }
+      }
+    }
+    stage('Update K8s Manifests & Push') {
+      environment {
+        githubUser = 'Jungkoo Yim' //Ryan Jang
+        githubEmail = 'mark.yim@klaytn.foundation' //c1t1d0s7@example.com
+        githubId = 'markyim-klaytn' //c1t1d0s7 
+        githubRepo = 'jenkins-k8s-argo' //jenkins-kube-deploy
+        githubURL = "https://github.com/${githubId}/${githubRepo}.git"
+        dockerhubId = 'jkyim76' //c1t1d0s7
+        dockerhubRepo = 'myhello' //hello-world
+      }
+      steps {
+        container('git') {
+          git branch: 'main', credentialsId: 'github-credential', url: "${githubURL}"
+          sh "git config --global --add safe.directory ${workspace}"
+          sh "git config --global user.name ${githubUser}"
+          sh "git config --global user.email ${githubEmail}"
+          sh 'sed -i "s/image:.*/image: ${dockerhubId}\\/${dockerhubRepo}:${BUILD_NUMBER}/g" deployment.yaml'
+          sh 'git add deployment.yaml'
+          sh 'git commit -m "Jenkins Build Number - ${BUILD_NUMBER}"'
+          withCredentials([gitUsernamePassword(credentialsId: 'github-credential', gitToolName: 'Default')]) {
+            sh 'git push --set-upstream origin main'
+          }
         }
       }
     }
